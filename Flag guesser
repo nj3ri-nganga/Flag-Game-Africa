@@ -1,0 +1,145 @@
+import random
+import os
+import tkinter as tk
+from tkinter import messagebox
+from PIL import Image, ImageTk
+
+# Function to get country names and flag file paths
+def get_countries_and_flags():
+    return {
+        "Algeria": "algeria.png",
+        "Angola": "angola.png",
+        "Benin": "benin.png",
+        "Botswana": "botswana.png", 
+        "Burkina Faso": "burkinafaso.png", 
+        "Burundi": "burundi.png", 
+        "Cabo Verde": "capeverde.png", 
+        "Cameroon": "cameroon.png", 
+        "Central African Republic": "CAR.png", 
+        "Chad": "chad.png",
+        "Comoros": "comoros.png", 
+        "Congo": "congo.png", 
+        "Democratic Republic of the Congo": "drc.png", 
+        "Djibouti": "djibuti.png", 
+        "Egypt": "egypt.png", 
+        "Equatorial Guinea": "equatorialguinea.png", 
+        "Eritrea": "eritrea.png", 
+        "Eswatini": "eswatini.png", 
+        "Ethiopia": "ethiopia.png",
+        "Gabon": "gabon.png", 
+        "Gambia": "gambia.png", 
+        "Ghana": "ghana.png", 
+        "Guinea": "guinea.png", 
+        "Guinea-Bissau": "guineabiss.png", 
+        "Ivory Coast": "ivoryCoast.png", 
+        "Kenya": "kenya.png", 
+        "Lesotho": "lesotho.png", 
+        "Liberia": "liberia.png", 
+        "Libya": "libya.png", 
+        "Madagascar": "madagascar.png",
+        "Malawi": "malawi.png", 
+        "Mali": "mali.png", 
+        "Mauritania": "mauratiana.png", 
+        "Mauritius": "mauratius.png", 
+        "Morocco": "morocco.png", 
+        "Mozambique": "mozambique.png", 
+        "Namibia": "namibia.png", 
+        "Niger": "niger.png", 
+        "Nigeria": "nigeria.png", 
+        "Rwanda": "rwanda.png", 
+        "São Tomé and Príncipe": "saotome.png",
+        "Senegal": "senegal.png", 
+        "Seychelles": "seychelles.png", 
+        "Sierra Leone": "sierraLeone.png", 
+        "Somalia": "somalia.png", 
+        "South Africa": "southAfrica.png", 
+        "South Sudan": "southSudan.png", 
+        "Sudan": "sudan.png", 
+        "Togo": "togo.png", 
+        "Tunisia": "tunisia.png", 
+        "Uganda": "uganda.png", 
+        "Zambia": "zambia.png", 
+        "Zimbabwe": "zimbabwe.png"
+
+    }
+
+# Function to check if the selected answer is correct
+def check_answer(selected_option):
+    global incorrect_guesses, score
+    if selected_option == correct_country:
+        score += 1
+        messagebox.showinfo("Correct!", "You got it right! ✅")
+    else:
+        incorrect_guesses += 1
+        messagebox.showerror("Wrong!", f"The correct answer was {correct_country}. ❌")
+
+    if incorrect_guesses >= max_wrong:
+        messagebox.showinfo("Game Over", f"Game Over! You got {incorrect_guesses} wrong. Final Score: {score}")
+        root.quit()
+    else:
+        next_question()
+
+# Function to load the next question
+def next_question():
+    global correct_country, options, country_label, flag_label
+
+    # Select a random country
+    correct_country, flag_path = random.choice(list(countries.items()))
+
+    # Debugging: Check if the flag file exists
+    if not os.path.exists(flag_path):
+        print(f"Error: {flag_path} not found!")
+        return  # Skip this question if the image is missing
+
+    # Generate multiple-choice options
+    options = [correct_country]
+    while len(options) < 3:
+        wrong_country = random.choice(list(countries.keys()))
+        if wrong_country not in options:
+            options.append(wrong_country)
+    random.shuffle(options)
+
+    # Load and display the flag image
+    try:
+        flag_img = Image.open(flag_path)
+        flag_img = flag_img.resize((150, 100))  # Resize the flag
+        flag_photo = ImageTk.PhotoImage(flag_img)
+        flag_label.config(image=flag_photo)
+        flag_label.image = flag_photo
+    except Exception as e:
+        print(f"Error loading image {flag_path}: {e}")
+
+    country_label.config(text="Which country does this flag belong to?")
+    for i in range(3):
+        buttons[i].config(text=options[i], command=lambda opt=options[i]: check_answer(opt))
+
+# Function to start the game
+def start_game():
+    global root, country_label, flag_label, buttons, incorrect_guesses, score, max_wrong, countries
+
+    root = tk.Tk()
+    root.title("Country Guessing Game")
+
+    countries = get_countries_and_flags()
+    incorrect_guesses = 0
+    score = 0
+    max_wrong = 3
+
+    country_label = tk.Label(root, text="", font=("Arial", 14))
+    country_label.pack()
+
+    flag_label = tk.Label(root)
+    flag_label.pack()
+
+    buttons = []
+    for _ in range(3):
+        btn = tk.Button(root, text="", font=("Arial", 12), width=20)
+        btn.pack()
+        buttons.append(btn)
+
+    next_question()
+    root.mainloop()
+
+# Run the game
+if __name__ == "__main__":
+    start_game()
